@@ -10,9 +10,11 @@ public class DifficultyScaling : MonoBehaviour
     public bool passedDist1;
     public bool passedDist2;
     public bool passedDist3;
+    public bool passedDist4;
     public int distance1;
     public int distance2;
     public int distance3;
+    public int distance4;
     public int playerXPos;
     public float defaultTimeBtwSpawn;
 
@@ -41,8 +43,14 @@ public class DifficultyScaling : MonoBehaviour
         if (playerXPos >= distance3 && !passedDist3)
         {
             passedDist3 = true;
-            playerScript.speed += 0.5f;
+            playerScript.speed += 0.25f;
             obstSpawner.setTimeBtwSpawn -= 0.5f;
+        }
+
+        if (playerXPos >= distance4 && !passedDist4)
+        {
+            passedDist4 = true;
+            playerScript.speed += 0.25f;
         }
     }
 

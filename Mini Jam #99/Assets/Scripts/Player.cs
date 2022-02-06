@@ -8,6 +8,7 @@ public class Player : MonoBehaviour
     public float setSpeed;
     public float flapForce;
     private Rigidbody2D rb;
+    private SpriteRenderer sr;
     private bool started;
     public Animator Anim;
     public ObstacleSpawner obstSpawner;
@@ -22,11 +23,18 @@ public class Player : MonoBehaviour
     public GameObject defaultCloudHolder;
     public GameObject DefaultClouds;
     public DifficultyScaling difficultyScaling;
+    public float trailTime;
+    public float setTrailTime;
+    public GameObject trailObj;
+    public GameObject flappedObj;
+    public GameObject trailHolder;
+    public ParticleSystem feathers;
 
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        sr = GetComponent<SpriteRenderer>();
         started = false;
         rb.simulated = false;
         gameOverMenu.SetActive(false);
@@ -37,6 +45,8 @@ public class Player : MonoBehaviour
         startMenu.SetActive(true);
         speed = setSpeed;
         playingMusic.SetActive(false);
+        trailTime = speed * 0.02f;
+        setTrailTime = trailTime;
     }
 
     // Update is called once per frame
@@ -58,6 +68,8 @@ public class Player : MonoBehaviour
             playingMusic.SetActive(true);
         }
 
+
+
         if (Input.GetKeyDown(KeyCode.Space) && gameOver == false)
         {
             started = true;
@@ -65,6 +77,14 @@ public class Player : MonoBehaviour
             rb.velocity = Vector2.up * flapForce;
             transform.eulerAngles = new Vector3(0f, 0f, 25f);
             FindObjectOfType<AudioManager>().Play("Flap");
+            Instantiate(flappedObj, transform.position, Quaternion.Euler(0, 0, 45), trailHolder.transform);
+        }
+
+        trailTime -= Time.deltaTime;
+        if (trailTime <= 0)
+        {
+            Instantiate(trailObj, transform.position, transform.rotation, trailHolder.transform);
+            trailTime = setTrailTime;
         }
 
         if (Input.GetKeyDown(KeyCode.R) && gameOver == true)
@@ -83,12 +103,16 @@ public class Player : MonoBehaviour
 
     void GameOver()
     {
+        
         Time.timeScale = 0;
+        FindObjectOfType<AudioManager>().Play("Died");
+        sr.color = new Color(255f, 255f, 255f, 0);
         started = false;
         obstSpawner.started = false;
         gameOverMenu.SetActive(true);
         obstSpawnerObject.SetActive(false);
         gameOver = true;
+        feathers.Emit(4);
     }
 
     void ResetGame()
@@ -120,5 +144,11 @@ public class Player : MonoBehaviour
         }
         difficultyScaling.ResetDifficulty();
         playingMusic.SetActive(false);
+        foreach (Transform child in trailHolder.transform)
+        {
+            Destroy(child.gameObject);
+        }
+        sr.color = new Color(255f, 255f, 255f, 1);
+        feathers.Clear();
     }
 }
